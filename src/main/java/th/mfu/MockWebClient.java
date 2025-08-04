@@ -5,18 +5,16 @@ import java.net.*;
 
 public class MockWebClient {
     public static void main(String[] args) {
-
-        // TODO Create a server socket bound to specified port
         Socket socket = null;
         try {
-            
+            // เชื่อมต่อไปยัง server ที่ localhost บน port 8080
             socket = new Socket("localhost", 8080);
 
+            // สร้าง stream สำหรับส่งข้อมูลไป server และรับข้อมูลจาก server
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-          
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            // ส่ง HTTP GET Request ไปยัง server
+            // ส่ง HTTP GET request ไปยัง server
             String request = "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n";
             out.println(request);
 
@@ -24,7 +22,6 @@ public class MockWebClient {
             String line;
             while ((line = in.readLine()) != null) {
                 System.out.println(line);
-                // ถ้าอยากหยุดตอนเจอบรรทัดว่าง (end of headers) ก็ใช้ break; ได้
             }
 
         } catch (IOException e) {

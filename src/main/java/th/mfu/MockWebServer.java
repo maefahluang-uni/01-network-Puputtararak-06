@@ -5,94 +5,78 @@ import java.net.*;
 
 public class MockWebServer implements Runnable {
 
-        private int port;
+    private int port;
 
-            public MockWebServer(int port) {
-                        this.port = port;
+    public MockWebServer(int port) {
+        this.port = port;
+    }
+
+    @Override
+    public void run() {
+        ServerSocket serverSocket = null;
+        try {
+            // สร้าง server socket เปิดพอร์ตที่กำหนด (เหมือนเปิดประตูห้องที่หมายเลข port)
+            serverSocket = new ServerSocket(port);
+            System.out.println("Mock Web Server running on port " + port + "...");
+
+            while (true) {
+                // รอรับการเชื่อมต่อจาก client (เหมือนคนมาติดต่อที่ประตูห้อง)
+                Socket clientSocket = serverSocket.accept();
+
+                // สร้าง stream สำหรับอ่านข้อมูลที่ client ส่งมา และส่งข้อมูลกลับไป
+                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+
+                // อ่าน request ของ client มา (เช่น HTTP GET)
+                String line;
+                while (!(line = in.readLine()).isEmpty()) {
+                    System.out.println("Received: " + line);
+                    // เราอ่านแค่ header request ไปเรื่อย ๆ จนเจอบรรทัดว่าง
+                }
+
+                // เตรียมข้อความตอบกลับ client เป็น HTML (เหมือนเขียนป้ายติดหน้าห้องบอกสวัสดี)
+                String response = "HTTP/1.1 200 OK\r\n" +
+                        "Content-Type: text/html\r\n\r\n" +
+                        "<html><body>Hello, Web! on Port " + port + "</body></html>";
+
+                // ส่ง response กลับไปให้ client
+                out.println(response);
+
+                // ปิดการเชื่อมต่อกับ client หลังส่งข้อมูลเสร็จ (เหมือนปิดประตูห้อง)
+                clientSocket.close();
             }
 
-                @Override
-                    public void run() {
-                                ServerSocket serverSocket = null;
-                                        try {
-                                                        // TODO Create a server socket bound to specified port
-                                                                    serverSocket = new ServerSocket(port);
-                                                                                System.out.println("Mock Web Server running on port " + port + "...");
-
-                                                                                            while (true) {
-                                                                                                                // TODO Accept incoming client connections
-                                                                                                                                Socket clientSocket = serverSocket.accept();
-
-                                                                                                                                                // สร้าง stream สำหรับอ่านข้อมูลที่ client ส่งมา และส่งข้อมูลกลับไป
-                                                                                                                                                                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                                                                                                                                                                                PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-
-                                                                                                                                                                                                // อ่าน request ของ client มา (เช่น HTTP GET)
-                                                                                                                                                                                                                String line;
-                                                                                                                                                                                                                                while (!(line = in.readLine()).isEmpty()) {
-                                                                                                                                                                                                                                                        System.out.println("Received: " + line);
-                                                                                                                                                                                                                                                                            // เราอ่านแค่ header request ไปเรื่อย ๆ จนเจอบรรทัดว่าง
-                                                                                                                                                                                                                                }
-
-                                                                                                                                                                                                                                                // เตรียมข้อความตอบกลับ client เป็น HTML (เหมือนเขียนป้ายติดหน้าห้องบอกสวัสดี)
-                                                                                                                                                                                                                                                                String response = "HTTP/1.1 200 OK\r\n" +
-                                                                                                                                                                                                                                                                                        "Content-Type: text/html\r\n\r\n" +
-                                                                                                                                                                                                                                                                                                                "<html><body>Hello, Web! on Port " + port + "</body></html>";
-
-                                                                                                                                                                                                                                                                                                                                // ส่ง response กลับไปให้ client
-                                                                                                                                                                                                                                                                                                                                                out.println(response);
-
-                                                                                                                                                                                                                                                                                                                                                                // ปิดการเชื่อมต่อกับ client หลังส่งข้อมูลเสร็จ (เหมือนปิดประตูห้อง)
-                                                                                                                                                                                                                                                                                                                                                                                clientSocket.close();
-                                                                                                                                                                                                                            }
-
-                                                                                                                                                                                                                        } catch (IOException e) {
-                                                                                                                                                                                                                                        e.printStackTrace();
-                                                                                                                                                                                                                        } finally {
-                                                                                                                                                                                                                                        // ปิด server socket เมื่อจบงาน
-                                                                                                                                                                                                                                                    if (serverSocket != null) {
-                                                                                                                                                                                                                                                                        try {
-                                                                                                                                                                                                                                                                                                serverSocket.close();
-                                                                                                                                                                                                                                                                        } catch (IOException e) {
-                                                                                                                                                                                                                                                                                                e.printStackTrace();
-                                                                                                                                                                                                                                                                        }
-                                                                                                                                                                                                                                                                    }
-                                                                                                                                                                                                                                                                }
-                                                                                                                                                                                                                                                            }
-
-                                                                                                                                                                                                                                                                public static void main(String[] args) {
-                                                                                                                                                                                                                                                                            // สร้าง Thread เพื่อรัน MockWebServer สองตัวบน port 8080 กับ 8081
-                                                                                                                                                                                                                                                                                    Thread server1 = new Thread(new MockWebServer(8080));
-                                                                                                                                                                                                                                                                                            server1.start();
-
-                                                                                                                                                                                                                                                                                                    Thread server2 = new Thread(new MockWebServer(8081));
-                                                                                                                                                                                                                                                                                                            server2.start();
-
-                                                                                                                                                                                                                                                                                                                    System.out.println("Press any key to stop the server...");
-                                                                                                                                                                                                                                                                                                                            try {
-                                                                                                                                                                                                                                                                                                                                            System.in.read();
-                                                                                                                                                                                                                                                                                                                                                        // หยุดการทำงานของ server
-                                                                                                                                                                                                                                                                                                                                                                    server1.interrupt();
-                                                                                                                                                                                                                                                                                                                                                                                server2.interrupt();
-                                                                                                                                                                                                                                                                                                                                                                                            System.out.println("Mock web server stopped.");
-                                                                                                                                                                                                                                                                                                                                                                                                        System.exit(0);
-                                                                                                                                                                                                                                                                                                                            } catch (IOException e) {
-                                                                                                                                                                                                                                                                                                                                            e.printStackTrace();
-                                                                                                                                                                                                                                                                                                                            }
-                                                                                                                                                                                                                                                                                                                        }
-                                                                                                                                                                                                                                                                                                                    }
-                                                                                                                                                                                                                                                                                                                    
-                                                                                                                                                                                                                                                                                                                            }
-                                                                                                                                                                                                                                                                                                                            }
-                                                                                                                                                                                                                                                                }
-                                                                                                                                                                                                                                                                        }
-                                                                                                                                                                                                                                                                        }
-                                                                                                                                                                                                                                                    }
-                                                                                                                                                                                                                        }
-                                                                                                                                                                                                                        }
-                                                                                                                                                                                                                                }
-                                                                                            }
-                                        }
-                    }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            // ปิด server socket เมื่อจบงาน
+            if (serverSocket != null) {
+                try {
+                    serverSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+        }
+    }
+    public static void main(String[] args) {
+        // สร้าง Thread เพื่อรัน MockWebServer สองตัวบน port 8080 กับ 8081
+        Thread server1 = new Thread(new MockWebServer(8080));
+        server1.start();
+
+        Thread server2 = new Thread(new MockWebServer(8081));
+        server2.start();
+
+        System.out.println("Press any key to stop the server...");
+        try {
+            System.in.read();
+            // หยุดการทำงานของ server
+            server1.interrupt();
+            server2.interrupt();
+            System.out.println("Mock web server stopped.");
+            System.exit(0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
